@@ -1,0 +1,58 @@
+/* 🏫 সৈয়দপুর মুসলিম উচ্চ বিদ্যালয় - গ্লোবাল কোর বুটস্ট্র্যাপ সিএসএস ৩.০ */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1e293b;
+  background-color: #f8fafc;
+  margin: 0;
+  padding: 0;
+}
+
+/* 📊 প্রাতিষ্ঠানিক টেবিল ডিজাইন */
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.board-table th, .board-table td {
+  border: 1px solid #cbd5e1;
+  padding: 12px;
+  text-align: center;
+}
+
+/* 📝 ফর্ম কন্ট্রোল ইনপুট স্টাইল */
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #0f172a;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* 🖨️ অফিশিয়াল শিক্ষাবোর্ড প্রিন্ট মিডিয়া লকিং ইঞ্জিন */
+@media print {
+  .no-print, header, footer, nav, button, input, select { 
+    display: none !important; 
+  }
+  body { 
+    background: #ffffff !important; 
+    padding: 0 !important; 
+    margin: 0 !important; 
+  }
+  #printable-result-card { 
+    border: none !important; 
+    box-shadow: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important;
+  }
+}

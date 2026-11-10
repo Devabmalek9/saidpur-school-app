@@ -1,0 +1,130 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ১. শিক্ষার্থী টেবিল (Student Profile)
+model Student {
+  id            String   @id @default(uuid())
+  studentId     String   @unique // রোল বা ইউনিক আইডি (যেমন: 1025)
+  name          String
+  class         String
+  section       String
+  rollNo        Int
+  parentPhone   String   
+  meritPosition String   @default("N/A") // মেধা স্থান
+  character     String   @default("উত্তম") // চারিত্রিক মূল্যায়ন
+  photo         String?  // 🎯 [মেগা ফিক্স]: প্রবেশপত্রে ছবি লোড করার জন্য নতুন অফিশিয়াল ঘর
+  createdAt     DateTime @default(now())
+  
+  results       Result[]
+}
+
+// ২. মাধ্যমিক শিক্ষা বোর্ড স্ট্যান্ডার্ড ফলাফল টেবিল (Exam Results)
+model Result {
+  id          String   @id @default(uuid())
+  subject     String   // বিষয়ের নাম
+  cqMarks     Float    @default(0) // CQ প্রাপ্ত নম্বর
+  cqPass      Float    @default(23) // CQ পাস মার্ক
+  mcqMarks    Float    @default(0) // MCQ প্রাপ্ত নম্বর
+  mcqPass     Float    @default(10) // MCQ পাস মার্ক
+  pracMarks   Float    @default(0) // Practical প্রাপ্ত নম্বর
+  pracPass    Float    @default(0)  // Practical পাস মার্ক
+  totalMarks  Float    // সর্বমোট নম্বর
+  marks       Float    @default(0) // ওল্ড কলাম ব্যাকআপ মেমরি
+  grade       String   // গ্রেড
+  gpa         Float    // জিপিএ
+  examTerm    String   // পরীক্ষার নাম (annual/half-yearly/pre-test)
+  
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+// ৩.// 📝 নতুন ও পুরাতন শিক্ষার্থীদের ডিজিটাল ভর্তি আবেদনপত্র টেবিল
+model Applicant {
+  id           String   @id @default(uuid())
+  name         String
+  fatherName   String
+  motherName   String
+  className    String
+  phone        String
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+
+  // 🎯 নতুন সরকারি ডাটাবেজ কলাম ম্যাপ (যা আপনার ডাটাবেজে যুক্ত ছিল না)
+  nameBn       String?
+  nameEn       String?
+  birthReg     String?
+  fatherNameBn String?
+  fatherNameEn String?
+  fatherNid    String?
+  motherNameBn String?
+  motherNameEn String?
+  motherNid    String?
+  address      String?
+  photo        String?  // শিক্ষার্থীর পাসপোর্ট সাইজ ছবির বেস৬৪ কোড স্টোরেজ
+}
+
+// 🔐 বিদ্যালয় ব্যবহারকারী ও শিক্ষক নিয়ন্ত্রণ টেবিল (Multi-Role User Control)
+model User {
+  id         String   @id @default(uuid())
+  name       String   // শিক্ষকের নাম
+  username   String   @unique // লগইন আইডি
+  password   String   // পাসওয়ার্ড
+  role       String   // পদমর্যাদা: "HEADMASTER" / "CLERK" / "TEACHER"
+  phone      String   @default("01700000000") // 📞 মোবাইল নম্বর কলাম
+  isApproved Boolean  @default(false) // প্রধান শিক্ষকের অনুমোদন স্ট্যাটাস
+  createdAt  DateTime @default(now())
+}
+
+// 📢 বিদ্যালয়ের ডিজিটাল নোটিশ বোর্ড টেবিল (Digital Notice Board)
+model Notice {
+  id        String   @id @default(uuid())
+  title     String   // নোটিশের শিরোনাম
+  content   String   // নোটিশের বিস্তারিত বিবরণ
+  date      String   // নোটিশ প্রকাশের তারিখ (উদাঃ ২৯ অক্টোবর, ২০২৬)
+  category  String   // ক্যাটাগরি: "General" / "Exam" / "Admission"
+  createdAt DateTime @default(now())
+}
+// 💰 বিদ্যালয় ফি ও বেতন আদায় নিয়ন্ত্রণ টেবيل (Fee & Tuition Collection Engine)
+model FeeCollection {
+  id          String   @id @default(uuid())
+  studentId   String   // শিক্ষার্থীর আইডি (উদাঃ 1025)
+  studentName String   // শিক্ষার্থীর নাম
+  class       String   // শ্রেণী
+  feeType     String   // ফি এর ধরণ: "TUITION" (মাসিক বেতন) / "ADMISSION" (ভর্তি ফি) / "EXAM" (পরীক্ষা ফি)
+  amount      Float    // আদায়কৃত টাকার পরিমাণ (টাকা)
+  monthName   String   // কোন মাসের বেতন (উদাঃ জানুয়ারি, ফেব্রুয়ারি অথবা "N/A")
+  date        String   // আদায়ের তারিখ (উদাঃ ৩০ অক্টোবর, ২০২৬)
+  collectedBy String   // কে আদায় করেছেন (উদাঃ "CLERK")
+  createdAt   DateTime @default(now())
+}
+// 📊 সৈয়দপুর মুসলিম উচ্চ বিদ্যালয়ের ফলাফল প্রকাশ ও নিয়ন্ত্রণ গেটওয়ে
+model SystemConfig {
+  id            String  @id @default("global_config")
+  isResultLive  Boolean @default(false) // false = শুধু প্রধান শিক্ষক দেখবেন, true = সবাই দেখবে
+}
+// 📊 সৈয়দপুর মুসলিম উচ্চ বিদ্যালয় প্রমোশন ও এক্সেল বাল্ক ডাটা ইমপোর্ট টেবিল
+model StudentPromotion {
+  id           String   @id @default(uuid())
+  studentId    String   @unique
+  name         String
+  currentClass String   // বর্তমান শ্রেণী (উদাঃ "ষষ্ঠ")
+  nextClass    String   // উত্তীর্ণ পরবর্তী শ্রেণী (উদাঃ "সপ্তম")
+  rollNo       String
+  status       String   @default("PASSED") // "PASSED" = উত্তীর্ণ, "FAILED" = অনুত্তীর্ণ
+  createdAt    DateTime @default(now())
+}
+// 📩 সৈয়দপুর মুসলিম উচ্চ বিদ্যালয় - যোগাযোগ ও বার্তা ইনবক্স টেবিল
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String?  @default("সাধারণ জিজ্ঞাসা")
+  message   String
+  createdAt DateTime @default(now())
+}
